@@ -64,7 +64,7 @@ func GetWithAOCCookie(url string, cookie string) []byte {
 
 	// specific error message from AOC site
 	if strings.HasPrefix(string(body), "Please don't repeatedly") {
-		log.Fatalf("Repeated request github.com/alexchao26/advent-of-code-go error")
+		log.Fatalf("Repeated request github.com/mheidinger/advent-of-code-go error")
 	}
 
 	return body

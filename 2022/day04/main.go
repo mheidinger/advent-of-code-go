@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alexchao26/advent-of-code-go/cast"
-	"github.com/alexchao26/advent-of-code-go/util"
+	"github.com/mheidinger/advent-of-code-go/cast"
+	"github.com/mheidinger/advent-of-code-go/util"
 )
 
 //go:embed input.txt
@@ -38,53 +38,85 @@ func main() {
 	}
 }
 
-func part1(input string) int {
-	lines := parseInput(input)
-	ans := 0
+type Range struct {
+	Lower  int
+	Higher int
+}
 
-	for _, l := range lines {
-		if doesPair2ContainPair1(l[:2], l[2:]) || doesPair2ContainPair1(l[2:], l[:2]) {
-			ans++
+func (r Range) size() int {
+	return r.Higher - r.Lower
+}
+
+type Pair struct {
+	FirstRange  Range
+	SecondRange Range
+}
+
+func (p Pair) fullyContained() bool {
+	first := p.FirstRange
+	second := p.SecondRange
+	if p.SecondRange.size() > p.FirstRange.size() {
+		second = p.FirstRange
+		first = p.SecondRange
+	}
+
+	if second.Lower >= first.Lower && second.Higher <= first.Higher {
+		return true
+	}
+	return false
+}
+
+func (p Pair) partlyContained() bool {
+	first := p.FirstRange
+	second := p.SecondRange
+	if p.SecondRange.Lower < p.FirstRange.Lower {
+		second = p.FirstRange
+		first = p.SecondRange
+	}
+
+	if (first.Lower <= second.Lower && first.Higher >= second.Lower) ||
+		(first.Lower <= second.Higher && first.Higher >= second.Higher) {
+		return true
+	}
+	return false
+}
+
+func part1(input string) int {
+	parsed := parseInput(input)
+
+	fullyContained := 0
+	for _, pair := range parsed {
+		if pair.fullyContained() {
+			fullyContained++
 		}
 	}
 
-	return ans
-}
-
-func doesPair2ContainPair1(pair1, pair2 []int) bool {
-	return pair1[0] >= pair2[0] && pair1[1] <= pair2[1]
+	return fullyContained
 }
 
 func part2(input string) int {
-	lines := parseInput(input)
-	ans := 0
+	parsed := parseInput(input)
 
-	for _, l := range lines {
-		if doesOverlap(l[:2], l[2:]) {
-			ans++
+	partlyContained := 0
+	for _, pair := range parsed {
+		if pair.partlyContained() {
+			partlyContained++
 		}
 	}
 
-	return ans
+	return partlyContained
 }
 
-func doesOverlap(pair1, pair2 []int) bool {
-	// sort
-	if pair1[0] > pair2[0] {
-		pair1, pair2 = pair2, pair1
-	}
-	return pair1[1] >= pair2[0]
-}
-
-func parseInput(input string) (ans [][]int) {
+func parseInput(input string) (ans []Pair) {
 	for _, line := range strings.Split(input, "\n") {
-		parts := strings.Split(line, ",")
-		leftParts := strings.Split(parts[0], "-")
-		rightParts := strings.Split(parts[1], "-")
-		ans = append(ans, []int{
-			cast.ToInt(leftParts[0]), cast.ToInt(leftParts[1]),
-			cast.ToInt(rightParts[0]), cast.ToInt(rightParts[1]),
-		})
+		pairSplit := strings.Split(line, ",")
+		rangeSplit1 := strings.Split(pairSplit[0], "-")
+		rangeSplit2 := strings.Split(pairSplit[1], "-")
+		pair := Pair{
+			Range{cast.ToInt(rangeSplit1[0]), cast.ToInt(rangeSplit1[1])},
+			Range{cast.ToInt(rangeSplit2[0]), cast.ToInt(rangeSplit2[1])},
+		}
+		ans = append(ans, pair)
 	}
 	return ans
 }

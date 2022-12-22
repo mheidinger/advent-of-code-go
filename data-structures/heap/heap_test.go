@@ -3,7 +3,7 @@ package heap_test
 import (
 	"testing"
 
-	"github.com/alexchao26/advent-of-code-go/data-structures/heap"
+	"github.com/mheidinger/advent-of-code-go/data-structures/heap"
 )
 
 type mockNode int

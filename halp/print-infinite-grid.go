@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alexchao26/advent-of-code-go/mathy"
+	"github.com/mheidinger/advent-of-code-go/mathy"
 )
 
 // PrintInfiniteGridStrings supports the type map[[2]int]string, determines the

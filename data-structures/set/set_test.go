@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/alexchao26/advent-of-code-go/data-structures/set"
+	"github.com/mheidinger/advent-of-code-go/data-structures/set"
 )
 
 func TestIntSet(t *testing.T) {

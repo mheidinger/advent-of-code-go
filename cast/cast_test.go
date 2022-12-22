@@ -3,7 +3,7 @@ package cast_test
 import (
 	"testing"
 
-	"github.com/alexchao26/advent-of-code-go/cast"
+	"github.com/mheidinger/advent-of-code-go/cast"
 )
 
 func TestToInt(t *testing.T) {

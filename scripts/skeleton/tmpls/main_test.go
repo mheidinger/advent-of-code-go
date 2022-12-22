@@ -15,7 +15,7 @@ func Test_part1(t *testing.T) {
 		{
 			name:  "example",
 			input: example,
-			want:  0,
+			want:  -1,
 		},
 		// {
 		// 	name:  "actual",
@@ -41,7 +41,7 @@ func Test_part2(t *testing.T) {
 		{
 			name:  "example",
 			input: example,
-			want:  0,
+			want:  -1,
 		},
 		// {
 		// 	name:  "actual",

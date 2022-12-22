@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alexchao26/advent-of-code-go/util"
+	"github.com/mheidinger/advent-of-code-go/util"
 )
 
 func GetInput(day, year int, cookie string) {

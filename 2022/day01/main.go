@@ -4,12 +4,10 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
-	"sort"
 	"strings"
 
-	"github.com/alexchao26/advent-of-code-go/cast"
-	"github.com/alexchao26/advent-of-code-go/mathy"
-	"github.com/alexchao26/advent-of-code-go/util"
+	"github.com/mheidinger/advent-of-code-go/cast"
+	"github.com/mheidinger/advent-of-code-go/util"
 )
 
 //go:embed input.txt
@@ -41,39 +39,59 @@ func main() {
 }
 
 func part1(input string) int {
-	elves := parseInput(input)
+	parsed := parseInput(input)
 
-	totals := []int{}
-	for _, items := range elves {
-		totals = append(totals, mathy.SumIntSlice(items))
+	highestCal := 0
+	for _, elf := range parsed {
+		elfCal := 0
+		for _, cal := range elf {
+			elfCal += cal
+		}
+		if elfCal > highestCal {
+			highestCal = elfCal
+		}
 	}
 
-	return mathy.MaxInt(totals...)
+	return highestCal
 }
 
 func part2(input string) int {
-	elves := parseInput(input)
+	parsed := parseInput(input)
 
-	totals := []int{}
-	for _, items := range elves {
-		totals = append(totals, mathy.SumIntSlice(items))
+	highestCal1 := -1
+	highestCal2 := -2
+	highestCal3 := -3
+	for _, elf := range parsed {
+		elfCal := 0
+		for _, cal := range elf {
+			elfCal += cal
+		}
+		if elfCal > highestCal1 && highestCal1 < highestCal2 && highestCal1 < highestCal3 {
+			highestCal1 = elfCal
+			continue
+		}
+		if elfCal > highestCal2 && highestCal2 < highestCal3 && highestCal2 < highestCal1 {
+			highestCal2 = elfCal
+			continue
+		}
+		if elfCal > highestCal3 && highestCal3 < highestCal2 && highestCal3 < highestCal1 {
+			highestCal3 = elfCal
+			continue
+		}
 	}
-	sort.Ints(totals)
 
-	topThree := 0
-	for i := 0; i < 3; i++ {
-		topThree += totals[len(totals)-1-i]
-	}
-	return topThree
+	return highestCal1 + highestCal2 + highestCal3
 }
 
 func parseInput(input string) (ans [][]int) {
-	for _, group := range strings.Split(input, "\n\n") {
-		row := []int{}
-		for _, line := range strings.Split(group, "\n") {
-			row = append(row, cast.ToInt(line))
+	currentElf := []int{}
+	for _, line := range strings.Split(input, "\n") {
+		if len(strings.TrimSpace(line)) == 0 {
+			ans = append(ans, currentElf)
+			currentElf = []int{}
+			continue
 		}
-		ans = append(ans, row)
+		currentElf = append(currentElf, cast.ToInt(line))
 	}
 	return ans
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alexchao26/advent-of-code-go/util"
+	"github.com/mheidinger/advent-of-code-go/util"
 )
 
 //go:embed input.txt
@@ -38,141 +38,145 @@ func main() {
 }
 
 const (
-	Win  = 6
-	Loss = 0
-	Draw = 3
-
-	Rock     = 1
-	Paper    = 2
-	Scissors = 3
+	scoreLoss = 0
+	scoreDraw = 3
+	scoreWin  = 6
 )
 
-// this code is heinoussssss
-// there's some kind of cheeky map to circular LL nodes to determine if you won or lost
-// but there are so few branches to handle that it's faster to just code it manually...
+type Play string
+
+const (
+	PlayRock    = "rock"
+	PlayPaper   = "paper"
+	PlayScissor = "scissor"
+)
+
+var playScores = map[Play]int{
+	PlayRock:    1,
+	PlayPaper:   2,
+	PlayScissor: 3,
+}
+
+type Outcome string
+
+const (
+	OutcomeLoss = "X"
+	OutcomeDraw = "Y"
+	OutcomeWin  = "Z"
+)
+
+var outcomeScores = map[Outcome]int{
+	OutcomeLoss: 0,
+	OutcomeDraw: 3,
+	OutcomeWin:  6,
+}
+
+type Round struct {
+	Opponent        Play
+	Self            Play
+	ExpectedOutcome Outcome
+}
+
+func (round Round) GetSelfScore() int {
+	var outcome Outcome
+	if round.Self == round.Opponent {
+		outcome = OutcomeDraw
+	} else if round.Self == PlayRock && round.Opponent == PlayScissor {
+		outcome = OutcomeWin
+	} else if round.Self == PlayPaper && round.Opponent == PlayScissor {
+		outcome = OutcomeLoss
+	} else if round.Self == PlayRock && round.Opponent == PlayPaper {
+		outcome = OutcomeLoss
+	} else if round.Self == PlayPaper && round.Opponent == PlayRock {
+		outcome = OutcomeWin
+	} else if round.Self == PlayScissor && round.Opponent == PlayPaper {
+		outcome = OutcomeWin
+	} else if round.Self == PlayScissor && round.Opponent == PlayRock {
+		outcome = OutcomeLoss
+	} else {
+		panic(fmt.Errorf("not handled situation: '%s' vs '%s'", round.Self, round.Opponent))
+	}
+	return playScores[round.Self] + outcomeScores[outcome]
+}
+
+func (round Round) GetExpectedOutcomeScore() int {
+	var play Play
+	if round.ExpectedOutcome == OutcomeDraw {
+		play = round.Opponent
+	} else if round.ExpectedOutcome == OutcomeWin {
+		switch round.Opponent {
+		case PlayPaper:
+			play = PlayScissor
+		case PlayRock:
+			play = PlayPaper
+		case PlayScissor:
+			play = PlayRock
+		}
+	} else if round.ExpectedOutcome == OutcomeLoss {
+		switch round.Opponent {
+		case PlayPaper:
+			play = PlayRock
+		case PlayRock:
+			play = PlayScissor
+		case PlayScissor:
+			play = PlayPaper
+		}
+	}
+	return outcomeScores[round.ExpectedOutcome] + playScores[play]
+}
 
 func part1(input string) int {
-	lines := parseInput(input)
-
-	// opp choices: ABC rock-paper-scissors
-	// my choices:  XYZ rock-paper-scissors
-	choices := map[string]int{
-		"X": Rock,
-		"Y": Paper,
-		"Z": Scissors,
-	}
+	parsed := parseInputPart1(input)
 
 	totalScore := 0
-	for _, l := range lines {
-		if _, ok := choices[l[1]]; !ok {
-			panic("choice not in choices map")
-		}
-		totalScore += choices[l[1]]
-		switch l[1] {
-		case "X": // i played rock
-			switch l[0] {
-			case "A":
-				totalScore += Draw
-			case "B":
-				totalScore += Loss
-			case "C":
-				totalScore += Win
-			default:
-				panic("unacceptable opp choice " + l[0])
-			}
-		case "Y": // i played paper
-			switch l[0] {
-			case "A": // rock
-				totalScore += Win
-			case "B": // paper
-				totalScore += Draw
-			case "C": // scissors
-				totalScore += Loss
-			default:
-				panic("unacceptable opp choice " + l[0])
-			}
-		case "Z": // i played scissors
-			switch l[0] {
-			case "A": // rock
-				totalScore += Loss
-			case "B": // paper
-				totalScore += Win
-			case "C": // scissors
-				totalScore += Draw
-			default:
-				panic("unacceptable opp choice " + l[0])
-			}
-		}
+	for _, round := range parsed {
+		totalScore += round.GetSelfScore()
 	}
 
 	return totalScore
 }
 
 func part2(input string) int {
-	/*
-		second column is result, not your choice
-		X -> you lose
-		Y -> draw
-		Z -> win
-	*/
-	lines := parseInput(input)
-
-	winningScores := map[string]int{
-		"X": Loss,
-		"Y": Draw,
-		"Z": Win,
-	}
+	parsed := parseInputPart2(input)
 
 	totalScore := 0
-	for _, l := range lines {
-		if _, ok := winningScores[l[1]]; !ok {
-			panic("unacceptable result " + l[1])
-		}
-		totalScore += winningScores[l[1]]
-		// switch on opp choice instead
-		switch l[0] {
-		case "A": // opp: rock
-			switch l[1] {
-			case "X": // lose
-				totalScore += Scissors
-			case "Y": // draw
-				totalScore += Rock
-			case "Z": // win
-				totalScore += Paper
-			default:
-				panic("unacceptable choice " + l[1])
-			}
-		case "B": // opp: paper
-			switch l[1] {
-			case "X": // lose
-				totalScore += Rock
-			case "Y": // draw
-				totalScore += Paper
-			case "Z": // win
-				totalScore += Scissors
-			default:
-				panic("unacceptable choice " + l[1])
-			}
-		case "C": // opp: scissors
-			switch l[1] {
-			case "X": // lose
-				totalScore += Paper
-			case "Y": // draw
-				totalScore += Scissors
-			case "Z": // win
-				totalScore += Rock
-			default:
-				panic("unacceptable choice " + l[1])
-			}
-		}
+	for _, round := range parsed {
+		totalScore += round.GetExpectedOutcomeScore()
 	}
 
 	return totalScore
 }
 
-func parseInput(input string) (ans [][]string) {
+func parseInputPart1(input string) (ans []Round) {
+	inputOpponent := map[string]string{
+		"A": PlayRock,
+		"B": PlayPaper,
+		"C": PlayScissor,
+	}
+
+	inputSelf := map[string]string{
+		"X": PlayRock,
+		"Y": PlayPaper,
+		"Z": PlayScissor,
+	}
+
 	for _, line := range strings.Split(input, "\n") {
-		ans = append(ans, strings.Split(line, " "))
+		splits := strings.Split(line, " ")
+		ans = append(ans, Round{Opponent: Play(inputOpponent[splits[0]]), Self: Play(inputSelf[splits[1]])})
+	}
+	return ans
+}
+
+func parseInputPart2(input string) (ans []Round) {
+	inputOpponent := map[string]string{
+		"A": PlayRock,
+		"B": PlayPaper,
+		"C": PlayScissor,
+	}
+
+	for _, line := range strings.Split(input, "\n") {
+		splits := strings.Split(line, " ")
+		ans = append(ans, Round{Opponent: Play(inputOpponent[splits[0]]), ExpectedOutcome: Outcome(splits[1])})
 	}
 	return ans
 }

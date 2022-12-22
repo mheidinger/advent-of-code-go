@@ -4,6 +4,20 @@ import (
 	"testing"
 )
 
+func TestToInt(t *testing.T) {
+	p := rune('p')
+	L := rune('L')
+
+	pInt := toInt(p)
+	if pInt != 16 {
+		t.Errorf("toInt(p) = %v, want %v", pInt, 16)
+	}
+	LInt := toInt(L)
+	if LInt != 38 {
+		t.Errorf("toInt(L) = %v, want %v", LInt, 38)
+	}
+}
+
 var example = `vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
@@ -22,11 +36,11 @@ func Test_part1(t *testing.T) {
 			input: example,
 			want:  157,
 		},
-		{
-			name:  "actual",
-			input: input,
-			want:  7553,
-		},
+		// {
+		// 	name:  "actual",
+		// 	input: input,
+		// 	want:  0,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -48,11 +62,11 @@ func Test_part2(t *testing.T) {
 			input: example,
 			want:  70,
 		},
-		{
-			name:  "actual",
-			input: input,
-			want:  2758,
-		},
+		// {
+		// 	name:  "actual",
+		// 	input: input,
+		// 	want:  0,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
